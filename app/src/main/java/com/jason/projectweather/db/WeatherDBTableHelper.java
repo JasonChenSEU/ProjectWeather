@@ -11,19 +11,19 @@ public class WeatherDBTableHelper extends SQLiteOpenHelper {
     private static final String CREATE_PROVINCE = "create table Province ("
             + "id integer primary key autoincrement, "
             + "province_name text, "
-            + "province_code text";
+            + "province_code text)";
 
     private static final String CREATE_CITY = "create table City ("
             + "id integer primary key autoincrement, "
             + "city_name text, "
             + "city_code text, "
-            + "province_id integer";
+            + "province_id integer)";
 
     private static final String CREATE_COUNTRY = "create table Country ("
             + "id integer primary key autoincrement, "
             + "country_name text, "
             + "country_code text, "
-            + "city_id integer";
+            + "city_id integer)";
 
     public WeatherDBTableHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);

@@ -30,7 +30,7 @@ public class WeatherDB {
     }
 
     public static synchronized WeatherDB getInstance(Context context){
-        if(weatherDB != null){
+        if(weatherDB == null){
             weatherDB = new WeatherDB(context);
         }
         return weatherDB;
@@ -61,7 +61,7 @@ public class WeatherDB {
             values.put("country_name",country.getStrCountryName());
             values.put("country_code",country.getStrCountryCode());
             values.put("city_id",country.getCity_id());
-            database.insert("Province", null, values);
+            database.insert("Country", null, values);
         }
     }
 
@@ -74,6 +74,7 @@ public class WeatherDB {
                 province.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 province.setStrProvinceName(cursor.getString(cursor.getColumnIndex("province_name")));
                 province.setStrProvinceCode(cursor.getString(cursor.getColumnIndex("province_code")));
+                list.add(province);
             }while(cursor.moveToNext());
         }
         if(cursor != null)
@@ -81,16 +82,17 @@ public class WeatherDB {
         return list;
     }
 
-    public List<City> loadCity(){
+    public List<City> loadCity(int provinceID){
         List<City> list = new ArrayList<>();
-        Cursor cursor = database.query("City",null,null,null,null,null,null);
+        Cursor cursor = database.query("City",null,"province_id = ?",new String[] {String.valueOf(provinceID)},null,null,null);
         if(cursor.moveToNext()){
             do{
                 City city = new City();
                 city.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 city.setStrCityName(cursor.getString(cursor.getColumnIndex("city_name")));
                 city.setStrCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
-                city.setId_Province(cursor.getInt(cursor.getColumnIndex("province_id")));
+                city.setId_Province(provinceID);
+                list.add(city);
             }while(cursor.moveToNext());
         }
         if(cursor != null)
@@ -98,16 +100,17 @@ public class WeatherDB {
         return list;
     }
 
-    public List<Country> loadCountry(){
+    public List<Country> loadCountry(int cityID){
         List<Country> list = new ArrayList<>();
-        Cursor cursor = database.query("Country",null,null,null,null,null,null);
+        Cursor cursor = database.query("Country",null,"city_id = ?",new String[]{String.valueOf(cityID)},null,null,null);
         if(cursor.moveToNext()){
             do{
                 Country country = new Country();
                 country.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 country.setStrCountryName(cursor.getString(cursor.getColumnIndex("country_name")));
                 country.setStrCountryCode(cursor.getString(cursor.getColumnIndex("country_code")));
-                country.setCity_id(cursor.getInt(cursor.getColumnIndex("city_id")));
+                country.setCity_id(cityID);
+                list.add(country);
             }while(cursor.moveToNext());
         }
         if(cursor != null)
