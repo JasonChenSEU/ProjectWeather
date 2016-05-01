@@ -1,6 +1,7 @@
 package com.jason.projectweather.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -70,6 +71,11 @@ public class ActivityChooseData extends AppCompatActivity {
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCountries();
+                }else if(currentLevel == LEVEL_COUNTRY){
+                    String strCountryName = countryList.get(position).getStrCountryName();
+                    Intent i = new Intent(ActivityChooseData.this, ActivityWeather.class);
+                    i.putExtra("CountryName",strCountryName);
+                    startActivity(i);
                 }
             }
         });
