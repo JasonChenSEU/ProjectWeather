@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="130dp"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        android:background="@drawable/main_title_bg">
+
+        <TextView
+            android:id="@+id/title2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="4dp"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:text="穿衣"/>
+
+        <TextView
+            android:id="@+id/index2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="4dp"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:text="舒适"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:background="@drawable/main_contain_bg">
+
+        <TextView
+            android:id="@+id/tip2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="15dp"
+            android:textSize="12dp"
+            android:textColor="@color/white"
+            android:text="穿衣指数：建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着建议穿着"/>
+
+    </RelativeLayout>
+</LinearLayout>

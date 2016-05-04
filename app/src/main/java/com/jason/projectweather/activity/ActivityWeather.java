@@ -1,16 +1,24 @@
 package com.jason.projectweather.activity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Xml;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jason.projectweather.R;
 import com.jason.projectweather.model.WeatherInfo;
@@ -24,6 +32,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityWeather extends AppCompatActivity {
 
@@ -48,10 +59,16 @@ public class ActivityWeather extends AppCompatActivity {
     TextView tvDay3Weather;
     TextView tvDay3Temp;
 
+    TextView tvUpdateTime;
+
     ImageView imgCurWea;
     ImageView imgWea1;
     ImageView imgWea2;
     ImageView imgWea3;
+
+    ArrayList<String> listIndexInfos = new ArrayList<>();
+
+    private String strCurrentHandle = null;
 
 
     @Override
@@ -64,12 +81,14 @@ public class ActivityWeather extends AppCompatActivity {
 
         pB = (ProgressBar)findViewById(R.id.progressBar);
 
-        String strCurrentHandle = getIntent().getStringExtra("CountryName");
+       strCurrentHandle = getIntent().getStringExtra("CountryName");
 
         if(strCurrentHandle != null){
             handleData(strCurrentHandle);
-        }else
+        }else {
+            strCurrentHandle = "北京";
             handleData("北京");
+        }
     }
 
     void setTextViews() {
@@ -92,10 +111,41 @@ public class ActivityWeather extends AppCompatActivity {
         tvDay3Weather = (TextView)findViewById(R.id.day3Weather);
         tvDay3Temp = (TextView)findViewById(R.id.day3Temp);
 
+        tvUpdateTime = (TextView) findViewById(R.id.updateTime);
+
         imgCurWea = (ImageView)findViewById(R.id.pictureUrl);
         imgWea1 = (ImageView)findViewById(R.id.picutureUrlDay1);
         imgWea2 = (ImageView)findViewById(R.id.picutureUrlDay2);
         imgWea3 = (ImageView)findViewById(R.id.picutureUrlDay3);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.weather_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id){
+            case R.id.menu_switch:
+                Intent i = new Intent(ActivityWeather.this, ActivityChooseData.class);
+                i.putExtra("from_weather_city", true);
+                startActivity(i);
+//                finish();
+                break;
+            case R.id.menu_refresh:
+                handleData(strCurrentHandle);
+                break;
+            case R.id.menu_index:
+                Intent intent = new Intent(ActivityWeather.this, ActivityIndex.class);
+                intent.putStringArrayListExtra("IndexInfos",listIndexInfos);
+                startActivity(intent);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void handleData(String strCity) {
@@ -145,13 +195,18 @@ public class ActivityWeather extends AppCompatActivity {
                 try {
                     parser.setInput(inputStream ,"UTF-8");
                     int eventType = parser.getEventType();
-
-                    while (eventType != XmlPullParser.END_DOCUMENT)
+                    boolean isSuccess = true;
+                    while (isSuccess && eventType != XmlPullParser.END_DOCUMENT)
                     {
                         switch(eventType)
                         {
                             case XmlPullParser.START_TAG:
                                 String strTagName = parser.getName();
+                                if (strTagName.equalsIgnoreCase("status")) {
+                                    if(!parser.nextText().equals("success")){
+                                        isSuccess = false;
+                                    }
+                                }
                                 if (strTagName.equalsIgnoreCase("currentCity"))
                                     info.setStrCurCity(parser.nextText());
                                 if(strTagName.equalsIgnoreCase("date"))
@@ -241,14 +296,14 @@ public class ActivityWeather extends AppCompatActivity {
                                         info.setStrImgUrl3(strsub);
                                     }
                                 }
-//                                else if(strTagName.equalsIgnoreCase("title"))
-//                                    strList.add(parser.nextText());
-//                                else if(strTagName.equalsIgnoreCase("zs"))
-//                                    strList.add(parser.nextText());
-//                                else if(strTagName.equalsIgnoreCase("tipt"))
-//                                    strList.add(parser.nextText());
-//                                else if(strTagName.equalsIgnoreCase("des"))
-//                                    strList.add(parser.nextText());
+                                else if(strTagName.equalsIgnoreCase("title"))
+                                    listIndexInfos.add(parser.nextText());
+                                else if(strTagName.equalsIgnoreCase("zs"))
+                                    listIndexInfos.add(parser.nextText());
+                                else if(strTagName.equalsIgnoreCase("tipt"))
+                                    listIndexInfos.add(parser.nextText());
+                                else if(strTagName.equalsIgnoreCase("des"))
+                                    listIndexInfos.add(parser.nextText());
                                 //if (strTagName.equalsIgnoreCase("weather_data"))
                                 //info.setStrCurTemp(parser.nextText());
                         }
@@ -270,9 +325,30 @@ public class ActivityWeather extends AppCompatActivity {
             return info;
         }
 
+
         @Override
         protected void onPostExecute(WeatherInfo info) {
             super.onPostExecute(info);
+
+            if(info.getStrCurCity() == null) {
+                AlertDialog.Builder ab = new AlertDialog.Builder(ActivityWeather.this);
+                ab.setTitle("Error");
+                ab.setMessage("Cannot find weather info...");
+                ab.setCancelable(false);
+                ab.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+                ab.show();
+            }else {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(ActivityWeather.this).edit();
+                editor.putBoolean("recordExist", true);
+                editor.putString("selected_country", info.getStrCurCity());
+                editor.commit();
+
+            }
 
             tvCurrentCity.setText(info.getStrCurCity());
             tvDate.setText(info.getStrCurDate());
@@ -318,6 +394,11 @@ public class ActivityWeather extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            String date = sDateFormat.format(new java.util.Date());
+
+            tvUpdateTime.setText(date + " 发布");
 
 
             pB.setVisibility(View.INVISIBLE);

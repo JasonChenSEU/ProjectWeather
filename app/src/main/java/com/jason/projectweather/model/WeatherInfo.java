@@ -4,6 +4,7 @@ package com.jason.projectweather.model;
  * Created by Jason on 2016/5/1.
  */
 public class WeatherInfo {
+
     /*Current Weather*/
     private String strCurCity = null;
     private String strCurWeek = null;
@@ -35,6 +36,16 @@ public class WeatherInfo {
     private String strWind3 = null;
     private String strImgUrl3 = null;
 
+    public String getStrUpdateTime() {
+        return strUpdateTime;
+    }
+
+    public void setStrUpdateTime(String strUpdateTime) {
+        this.strUpdateTime = strUpdateTime;
+    }
+
+    private String strUpdateTime = null;
+
 
     /*get series*/
     public String getStrCurCity(){return strCurCity;}
@@ -65,6 +76,7 @@ public class WeatherInfo {
     public String getStrTemp3(){return strTemp3;}
     public String getStrWind3(){return strWind3;}
     public String getStrImgUrl3(){return strImgUrl3;}
+
 
     /*set series*/
     public void setStrCurCity(String s){this.strCurCity = s;}

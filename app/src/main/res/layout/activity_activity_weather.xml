@@ -131,7 +131,7 @@
                     android:layout_marginRight="15dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/weathericon_condition_01" />
+                    android:src="@drawable/wu" />
 
             </RelativeLayout>
 

@@ -26,7 +26,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginTop="5dp"
-            android:src="@drawable/weathericon_condition_01" />
+            android:src="@drawable/wu" />
 
         <TextView
             android:id="@+id/day3Weather"

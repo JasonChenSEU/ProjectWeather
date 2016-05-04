@@ -2,7 +2,9 @@ package com.jason.projectweather.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,6 +27,7 @@ import com.jason.projectweather.util.HttpUtil;
 
 import java.sql.DataTruncation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ActivityChooseData extends AppCompatActivity {
@@ -39,6 +42,9 @@ public class ActivityChooseData extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private WeatherDB db;
     private List<String> dataList = new ArrayList<>();
+    private List<String> dirCityList = new ArrayList<>(Arrays.asList(new String[]{"北京","上海","天津","重庆"}));
+
+    public boolean isSwitch;
 
 
     private List<Province> provinceList;
@@ -53,6 +59,15 @@ public class ActivityChooseData extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //isSwitch: is from menu of WeatherActivity
+        isSwitch = getIntent().getBooleanExtra("from_weather_city",false);
+        if(!isSwitch && sharedPreferences.getBoolean("recordExist", false) ){
+            Intent i = new Intent(ActivityChooseData.this, ActivityWeather.class);
+            i.putExtra("CountryName",sharedPreferences.getString("selected_country", null));
+            startActivity(i);
+            finish();
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.datachoose);
 
@@ -67,7 +82,15 @@ public class ActivityChooseData extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(currentLevel == LEVEL_PROVINCE){
                     selectedProvince = provinceList.get(position);
-                    queryCities();
+                    if(dirCityList.contains(selectedProvince.getStrProvinceName())){
+//                        Intent i = new Intent(ActivityChooseData.this, ActivityWeather.class);
+//                        i.putExtra("CountryName",selectedProvince.getStrProvinceName());
+//                        startActivity(i);
+                        queryCities(false);
+                        selectedCity = cityList.get(0);
+                        queryCountries();
+                    }else
+                        queryCities();
                 }else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCountries();
@@ -98,20 +121,26 @@ public class ActivityChooseData extends AppCompatActivity {
             queryFromServer(null, "province");
     }
 
-
-    private void queryCities() {
+    private void queryCities(boolean isShow) {
         cityList = db.loadCity(selectedProvince.getId());
         if(cityList.size() > 0){
-            dataList.clear();
-            for(City city: cityList){
-                dataList.add(city.getStrCityName());
+            if(isShow) {
+                dataList.clear();
+                for (City city : cityList) {
+                    dataList.add(city.getStrCityName());
+                }
+                adapter.notifyDataSetChanged();
+                listView.setSelection(0);
+                textView.setText(selectedProvince.getStrProvinceName());
             }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            textView.setText(selectedProvince.getStrProvinceName());
             currentLevel = LEVEL_CITY;
         }else
             queryFromServer(selectedProvince.getStrProvinceCode(), "city");
+
+    }
+
+    private void queryCities() {
+        queryCities(true);
     }
 
     private void queryCountries() {
@@ -194,12 +223,18 @@ public class ActivityChooseData extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(currentLevel == LEVEL_COUNTRY)
-            queryCities();
+        if(currentLevel == LEVEL_COUNTRY) {
+            if(dirCityList.contains(selectedProvince.getStrProvinceName()))
+                queryProvinces();
+            else
+                queryCities();
+        }
         else if(currentLevel == LEVEL_CITY)
             queryProvinces();
-        else
+        else{
             finish();
+        }
+
     }
 }
 

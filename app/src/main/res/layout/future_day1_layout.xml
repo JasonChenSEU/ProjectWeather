@@ -25,7 +25,7 @@
             android:id="@+id/picutureUrlDay1"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@drawable/weathericon_condition_01" />
+            android:src="@drawable/wu" />
 
         <TextView
             android:id="@+id/day1Weather"
